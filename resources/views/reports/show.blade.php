@@ -7,6 +7,21 @@
 
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            {{-- Notifikasi Sukses --}}
+            @if(session('success'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm" role="alert">
+                    <p>{{ session('success') }}</p>
+                </div>
+            @endif
+
+            {{-- Notifikasi Error (misalnya laporan tidak bisa diedit) --}}
+            @if(session('error'))
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm" role="alert">
+                    <p>{{ session('error') }}</p>
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl p-6 lg:p-8 space-y-6">
                 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">

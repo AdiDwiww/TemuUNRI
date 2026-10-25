@@ -88,20 +88,31 @@ class ReportController extends Controller
         return view('reports.show', compact('report'));
     }
 
-    // Form Edit Laporan (Milik Sendiri)[cite: 4]
+    // Form Edit Laporan (Milik Sendiri, hanya jika status 'pending')
     public function edit(Laporan $report)
     {
         if ($report->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized action.');
+            abort(403, 'Anda tidak memiliki akses untuk mengedit laporan ini.');
         }
+
+        if ($report->status !== 'pending') {
+            return redirect()->route('reports.show', $report->id)
+                ->with('error', 'Laporan tidak dapat diedit karena statusnya sudah bukan "Menunggu".');
+        }
+
         return view('reports.edit', compact('report'));
     }
 
-    // Update Laporan
+    // Update Laporan (hanya jika status 'pending')
     public function update(Request $request, Laporan $report)
     {
         if ($report->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized action.');
+            abort(403, 'Anda tidak memiliki akses untuk memperbarui laporan ini.');
+        }
+
+        if ($report->status !== 'pending') {
+            return redirect()->route('reports.show', $report->id)
+                ->with('error', 'Laporan tidak dapat diperbarui karena statusnya sudah bukan "Menunggu".');
         }
 
         $request->validate([
@@ -135,11 +146,16 @@ class ReportController extends Controller
         return redirect()->route('reports.index')->with('success', 'Laporan berhasil diperbarui.');
     }
 
-    // Hapus Laporan (Milik Sendiri)[cite: 4]
+    // Hapus Laporan (Milik Sendiri, hanya jika status 'pending')
     public function destroy(Laporan $report)
     {
         if ($report->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized action.');
+            abort(403, 'Anda tidak memiliki akses untuk menghapus laporan ini.');
+        }
+
+        if ($report->status !== 'pending') {
+            return redirect()->route('reports.show', $report->id)
+                ->with('error', 'Laporan tidak dapat dihapus karena statusnya sudah bukan "Menunggu".');
         }
 
         if ($report->foto) {
