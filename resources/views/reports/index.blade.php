@@ -104,13 +104,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Status Laporan</label>
-                        <select name="status" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
-                            <option value="">Semua Status</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="proses" {{ request('status') == 'proses' ? 'selected' : '' }}>Proses</option>
-                            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                        </select>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Kategori Barang</label>
+                        <input type="text" name="kategori" value="{{ request('kategori') }}" placeholder="Cari kategori..." class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
                     </div>
 
                     <div class="flex items-end space-x-2">
@@ -123,7 +118,7 @@
             <!-- Tabel Daftar Laporan Lengkap dengan Pagination -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl">
                 <div class="p-6 text-gray-900 border-b border-gray-200">
-                    <h3 class="font-bold text-lg">Semua Daftar Laporan</h3>
+                    <h3 class="font-bold text-lg">Daftar Laporan Aktif</h3>
                 </div>
 
                 <div class="overflow-x-auto">

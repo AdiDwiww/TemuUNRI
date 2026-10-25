@@ -16,28 +16,37 @@ class ReportController extends Controller
         $tipe = $request->input('tipe');
         $status = $request->input('status');
 
-        $query = Laporan::with('user')->latest();
+        // Daftar Laporan Aktif di Beranda: Hanya menampilkan laporan berstatus 'proses' (disetujui admin)
+        $query = Laporan::with('user')
+            ->where('status', 'proses')
+            ->latest();
 
-        // Fitur Pencarian & Filter[cite: 4]
+        // Fitur Pencarian & Filter (hanya berlaku pada laporan aktif 'proses')
         if ($search) {
-            $query->where('judul', 'like', "%{$search}%")
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
                   ->orWhere('lokasi', 'like', "%{$search}%");
+            });
         }
         if ($kategori) {
-            $query->where('kategori', $kategori);
+            $query->where('kategori', 'like', "%{$kategori}%");
         }
         if ($tipe) {
             $query->where('tipe', $tipe);
         }
         if ($status) {
-            $query->where('status', $status);
+            if ($status !== 'proses') {
+                $query->whereRaw('0 = 1');
+            }
         }
 
         $laporans = $query->paginate(10); // Pagination daftar laporan[cite: 4]
 
-        // Pengelompokan untuk Beranda[cite: 4]
-        $barangHilang = Laporan::where('tipe', 'hilang')->latest()->take(5)->get();
-        $barangPenemuan = Laporan::where('tipe', 'penemuan')->latest()->take(5)->get();
+        // Pengelompokan untuk Beranda:
+        // Laporan aktif hanya yang berstatus 'proses'
+        $barangHilang = Laporan::where('tipe', 'hilang')->where('status', 'proses')->latest()->take(5)->get();
+        $barangPenemuan = Laporan::where('tipe', 'penemuan')->where('status', 'proses')->latest()->take(5)->get();
+        // Bagian riwayat terpisah untuk laporan yang sudah selesai
         $laporanSelesai = Laporan::where('status', 'selesai')->latest()->take(5)->get();
 
         return view('reports.index', compact('laporans', 'barangHilang', 'barangPenemuan', 'laporanSelesai'));
