@@ -7,6 +7,43 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Menjalankan TemuUNRI setelah clone
+
+Prasyarat: PHP 8.3 atau lebih baru, Composer, dan Node.js 24 LTS (termasuk npm dan npx).
+Untuk konfigurasi bawaan SQLite, aktifkan ekstensi PHP `pdo_sqlite` dan `sqlite3`.
+
+Di terminal pada folder proyek, jalankan sekali setelah clone:
+
+```powershell
+composer run setup
+```
+
+Perintah ini memasang dependensi PHP dan JavaScript, menyalin `.env.example` jika
+`.env` belum ada, membuat `APP_KEY`, menjalankan migrasi, dan membangun aset frontend.
+Konfigurasi bawaan menggunakan SQLite sehingga MySQL tidak perlu dinyalakan.
+Gunakan perintah setup untuk instalasi awal karena perintah ini membuat ulang `APP_KEY`.
+
+Untuk menjalankan aplikasi setiap hari:
+
+```powershell
+composer run dev
+```
+
+Buka http://127.0.0.1:8000. Perintah ini menjalankan server Laravel, antrean, dan Vite.
+Tekan `Ctrl+C` untuk menghentikannya.
+
+Jika `npx` tidak dikenali, pasang Node.js LTS dari https://nodejs.org/en/download,
+lalu tutup dan buka kembali terminal atau VS Code. Periksa dengan `node -v`,
+`npm.cmd -v`, dan `npx.cmd -v`. Jika PowerShell memblokir `npm.ps1`, gunakan
+`npm.cmd` untuk menjalankan npm secara langsung.
+
+Pail tidak dijalankan oleh skrip `dev` karena memerlukan ekstensi PCNTL yang tidak
+tersedia pada PHP Windows. Untuk melihat log pada terminal PowerShell terpisah:
+
+```powershell
+Get-Content .\storage\logs\laravel.log -Tail 50 -Wait
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
