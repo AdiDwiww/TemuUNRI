@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -20,6 +21,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Rute Admin — dilindungi oleh middleware auth DAN admin (pemeriksaan role di server)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard Admin
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Detail Laporan untuk Admin
+    Route::get('/laporan/{laporan}', [AdminDashboardController::class, 'show'])->name('laporan.show');
+
+    // Setujui laporan pending → status menjadi 'proses'
+    Route::post('/laporan/{laporan}/setujui', [AdminDashboardController::class, 'setujui'])->name('laporan.setujui');
+
+    // Tolak laporan pending → status menjadi 'Ditolak'
+    Route::post('/laporan/{laporan}/tolak', [AdminDashboardController::class, 'tolak'])->name('laporan.tolak');
 });
 
 require __DIR__.'/auth.php';

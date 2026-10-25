@@ -18,6 +18,11 @@
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                         Beranda Laporan
                     </x-nav-link>
+                    @if(Auth::user()->isAdmin())
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                            <span class="text-red-600 font-semibold">Panel Admin</span>
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -76,6 +81,11 @@
             <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                 Beranda Laporan
             </x-responsive-nav-link>
+            @if(Auth::user()->isAdmin())
+                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                    Panel Admin
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Pengaturan Akun Mobile -->
