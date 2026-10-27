@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\ClaimController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -16,6 +17,12 @@ Route::middleware('auth')->group(function () {
 
     // Rute CRUD Laporan (Orang 1)
     Route::resource('reports', ReportController::class);
+
+    // Rute Klaim (Orang 3) — terima/tolak klaim tetap milik Orang 4
+    Route::get('/claims', [ClaimController::class, 'index'])->name('claims.index');
+    Route::get('/reports/{report}/claims/create', [ClaimController::class, 'create'])->name('claims.create');
+    Route::post('/reports/{report}/claims', [ClaimController::class, 'store'])->name('claims.store');
+    Route::get('/claims/{claim}', [ClaimController::class, 'show'])->name('claims.show');
 
     // Rute Profil Pengguna (Orang 2)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
