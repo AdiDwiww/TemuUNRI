@@ -27,4 +27,14 @@ class Laporan extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function claims()
+{
+    return $this->hasMany(Claim::class, 'laporan_id');
+}
+
+public function conversations()
+{
+    return $this->hasMany(Conversation::class, 'laporan_id');
+}
 }
