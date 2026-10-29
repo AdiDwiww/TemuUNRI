@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Claim;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
 
@@ -27,6 +28,12 @@ class DashboardController extends Controller
         $jumlahDitolak  = Laporan::where('user_id', $user->id)->where('status', 'Ditolak')->count();
         $jumlahTotal    = Laporan::where('user_id', $user->id)->count();
 
+        // Jumlah klaim masuk berstatus pending pada laporan penemuan milik pengguna
+        $jumlahKlaimMasukPending = Claim::whereHas('laporan', function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                  ->where('tipe', 'penemuan');
+        })->where('status', 'pending')->count();
+
         return view('dashboard', compact(
             'user',
             'laporans',
@@ -34,7 +41,9 @@ class DashboardController extends Controller
             'jumlahProses',
             'jumlahSelesai',
             'jumlahDitolak',
-            'jumlahTotal'
+            'jumlahTotal',
+            'jumlahKlaimMasukPending'
         ));
     }
 }
+
