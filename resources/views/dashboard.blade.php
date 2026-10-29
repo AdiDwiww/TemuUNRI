@@ -114,9 +114,9 @@
                 </div>
             </div>
 
-            {{-- Aktivitas Klaim: Persiapan UI Klaim Masuk & Klaim Saya --}}
+            {{-- Aktivitas Klaim: Klaim Masuk & Klaim Saya --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {{-- Card 1: Klaim Masuk (Persiapan UI untuk Pelapor Barang Temuan) --}}
+                {{-- Card 1: Klaim Masuk (Untuk Pelapor Barang Temuan) --}}
                 <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-5 flex flex-col justify-between">
                     <div class="space-y-2.5">
                         <div class="flex items-center justify-between">
@@ -131,20 +131,29 @@
                                     <p class="text-[11px] text-slate-500">Klaim dari pengguna lain atas barang temuan Anda</p>
                                 </div>
                             </div>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-navy-50 text-navy-800 border border-navy-100 uppercase tracking-wider">
-                                Siap Dikembangkan
-                            </span>
+                            @if(isset($jumlahKlaimMasukPending) && $jumlahKlaimMasukPending > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 uppercase tracking-wider">
+                                    {{ $jumlahKlaimMasukPending }} Menunggu
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-50 text-slate-600 border border-slate-200 uppercase tracking-wider">
+                                    0 Menunggu
+                                </span>
+                            @endif
                         </div>
                         <p class="text-xs text-slate-600 leading-relaxed">
-                            Sebagai penemu barang, Anda yang akan memverifikasi dan memutuskan penerimaan atau penolakan klaim kepemilikan. Modul persetujuan klaim masuk sedang disiapkan untuk tahap implementasi backend berikutnya.
+                            Sebagai penemu barang, verifikasi dan putuskan penerimaan atau penolakan klaim kepemilikan yang diajukan oleh pengguna lain di lingkungan kampus.
                         </p>
                     </div>
-                    <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                        <span class="flex items-center text-[11px]">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 me-1.5 animate-pulse"></span>
-                            Menunggu integrasi alur persetujuan
-                        </span>
-                        <span class="text-[11px] font-medium text-slate-400 italic">Segera Hadir</span>
+                    <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-[11px] text-slate-400">Verifikasi klaim kepemilikan</span>
+                        <a href="{{ route('claims.incoming') }}"
+                           class="inline-flex items-center text-xs font-semibold text-navy-800 hover:text-navy-900 hover:underline">
+                            Buka Klaim Masuk
+                            <svg class="w-3.5 h-3.5 ms-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
                     </div>
                 </div>
 
