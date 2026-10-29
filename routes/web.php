@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\ClaimController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +25,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/{report}/claims/create', [ClaimController::class, 'create'])->name('claims.create');
     Route::post('/reports/{report}/claims', [ClaimController::class, 'store'])->name('claims.store');
     Route::get('/claims/{claim}', [ClaimController::class, 'show'])->name('claims.show');
+
+    // Rute Chat (Orang 3) — akses peserta dicek di controller (abort 403)
+    Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
+    Route::post('/reports/{report}/conversations', [ConversationController::class, 'store'])->name('conversations.store');
+    Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
+    Route::get('/conversations/{conversation}/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store'])->name('messages.store');
 
     // Rute Profil Pengguna (Orang 2)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

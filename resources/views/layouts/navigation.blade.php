@@ -21,6 +21,9 @@
                     <x-nav-link :href="route('claims.index')" :active="request()->routeIs('claims.*')">
                         Klaim Saya
                     </x-nav-link>
+                    <x-nav-link :href="route('conversations.index')" :active="request()->routeIs('conversations.*')">
+                        Pesan
+                    </x-nav-link>
                     @if(Auth::user()->isAdmin())
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
                             <span class="text-red-600 font-semibold">Panel Admin</span>
@@ -86,6 +89,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('claims.index')" :active="request()->routeIs('claims.*')">
                 Klaim Saya
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('conversations.index')" :active="request()->routeIs('conversations.*')">
+                Pesan
             </x-responsive-nav-link>
             @if(Auth::user()->isAdmin())
                 <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
