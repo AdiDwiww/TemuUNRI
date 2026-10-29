@@ -56,4 +56,24 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    public function claims()
+{
+    return $this->hasMany(Claim::class);
+}
+
+public function reportedConversations()
+{
+    return $this->hasMany(Conversation::class, 'reporter_id');
+}
+
+public function participatedConversations()
+{
+    return $this->hasMany(Conversation::class, 'participant_id');
+}
+
+public function sentMessages()
+{
+    return $this->hasMany(Message::class, 'sender_id');
+}
 }
