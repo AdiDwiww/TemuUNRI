@@ -20,11 +20,13 @@ Route::middleware('auth')->group(function () {
     // Rute CRUD Laporan (Orang 1)
     Route::resource('reports', ReportController::class);
 
-    // Rute Klaim (Orang 3) — terima/tolak klaim tetap milik Orang 4
+    // Rute Klaim
     Route::get('/claims', [ClaimController::class, 'index'])->name('claims.index');
+    Route::get('/claims/incoming', [ClaimController::class, 'incoming'])->name('claims.incoming');
     Route::get('/reports/{report}/claims/create', [ClaimController::class, 'create'])->name('claims.create');
     Route::post('/reports/{report}/claims', [ClaimController::class, 'store'])->name('claims.store');
-    Route::get('/claims/{claim}', [ClaimController::class, 'show'])->name('claims.show');
+    Route::patch('/claims/{claim}/decision', [ClaimController::class, 'decide'])->name('claims.decide')->whereNumber('claim');
+    Route::get('/claims/{claim}', [ClaimController::class, 'show'])->name('claims.show')->whereNumber('claim');
 
     // Rute Chat (Orang 3) — akses peserta dicek di controller (abort 403)
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
