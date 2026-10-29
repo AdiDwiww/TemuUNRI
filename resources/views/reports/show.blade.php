@@ -71,18 +71,50 @@
                     </div>
                 </div>
 
-                <!-- Titik masuk ke fitur klaim dan chat (Sesuai panduan Orang 1 & Orang 3) -->
+                <!-- Titik masuk ke fitur klaim dan chat (Orang 3) -->
+                @php
+                    $klaimSaya = auth()->check()
+                        ? $report->claims()->where('user_id', auth()->id())->first()
+                        : null;
+                    $bisaKlaim = auth()->check()
+                        && $report->user_id !== auth()->id()
+                        && $report->tipe === 'penemuan'
+                        && $report->status === 'proses'
+                        && ! $klaimSaya;
+                    $bisaChat = auth()->check() && $report->user_id !== auth()->id();
+                @endphp
+
                 <div class="pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
                     <a href="{{ route('reports.index') }}" class="w-full sm:w-auto text-center bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-md text-sm font-semibold transition">
                         &larr; Kembali ke Beranda
                     </a>
 
-                    @if($report->user_id !== auth()->id())
-                        <button class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-md text-sm font-semibold shadow transition flex items-center justify-center">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                            Ajukan Klaim / Chat Pemilik
-                        </button>
-                    @endif
+                    <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
+                        @if($klaimSaya)
+                            <a href="{{ route('claims.show', $klaimSaya) }}" class="w-full sm:w-auto text-center bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-6 py-2.5 rounded-md text-sm font-semibold transition">
+                                Lihat Klaim Saya
+                            </a>
+                        @elseif($bisaKlaim)
+                            <a href="{{ route('claims.create', $report) }}" class="w-full sm:w-auto text-center bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-md text-sm font-semibold shadow transition">
+                                Ajukan Klaim
+                            </a>
+                        @endif
+
+                        @if($bisaChat)
+                            @if(Route::has('conversations.store'))
+                                <form method="POST" action="{{ route('conversations.store', $report) }}">
+                                    @csrf
+                                    <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-md text-sm font-semibold shadow transition">
+                                        Chat Pelapor
+                                    </button>
+                                </form>
+                            @else
+                                <button type="button" disabled title="Fitur chat dikerjakan di tahap berikutnya" class="w-full sm:w-auto bg-indigo-200 text-indigo-700 px-6 py-2.5 rounded-md text-sm font-semibold cursor-not-allowed">
+                                    Chat Pelapor
+                                </button>
+                            @endif
+                        @endif
+                    </div>
                 </div>
 
             </div>
