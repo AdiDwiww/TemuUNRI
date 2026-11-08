@@ -85,9 +85,10 @@ class AdminTest extends TestCase
     }
 
     /**
-     * Dashboard admin menampilkan daftar laporan yang berstatus pending.
+     * Dashboard admin menampilkan semua laporan (tab baru: Kelola Semua Laporan).
+     * Tab ini menampilkan seluruh laporan dari semua status, bukan hanya pending.
      */
-    public function test_dashboard_admin_menampilkan_laporan_pending(): void
+    public function test_dashboard_admin_menampilkan_semua_laporan(): void
     {
         $admin = User::factory()->admin()->create();
 
@@ -102,8 +103,28 @@ class AdminTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
         $response->assertStatus(200);
+        // Kedua laporan harus tampil karena tab menampilkan SEMUA status
         $response->assertSee('Tas Ransel Biru Menunggu Persetujuan');
-        $response->assertDontSee('Kunci Motor Yang Sudah Aktif');
+        $response->assertSee('Kunci Motor Yang Sudah Aktif');
+    }
+
+    /**
+     * Dashboard admin mendukung filter berdasarkan status laporan.
+     */
+    public function test_dashboard_admin_filter_status_laporan(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        Laporan::factory()->create(['status' => 'pending', 'judul' => 'Laporan Pending Filter']);
+        Laporan::factory()->proses()->create(['judul' => 'Laporan Proses Filter']);
+
+        // Filter hanya MENUNGGU (pending)
+        $response = $this->actingAs($admin)
+            ->get(route('admin.dashboard', ['status_filter' => 'MENUNGGU']));
+
+        $response->assertStatus(200);
+        $response->assertSee('Laporan Pending Filter');
+        $response->assertDontSee('Laporan Proses Filter');
     }
 
     // =========================================================
@@ -404,5 +425,58 @@ class AdminTest extends TestCase
             ->get(route('reports.index', ['tipe' => 'hilang']));
 
         $response->assertSee('Payung Biru Hilang di Kantin');
+    }
+
+    // =========================================================
+    // Test: Fitur Verifikasi Klaim & Export CSV oleh Admin
+    // =========================================================
+
+    /**
+     * Admin dapat menyetujui klaim pending sehingga klaim accepted dan laporan selesai.
+     */
+    public function test_admin_dapat_menyetujui_klaim(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $klaim = \App\Models\Claim::factory()->create(['status' => 'pending']);
+
+        $response = $this->actingAs($admin)
+            ->post(route('admin.klaim.setujui', $klaim->id));
+
+        $response->assertRedirect(route('admin.dashboard', ['tab' => 'klaim']));
+        $response->assertSessionHas('success');
+
+        $this->assertEquals('accepted', $klaim->fresh()->status);
+        $this->assertEquals('selesai', $klaim->laporan->fresh()->status);
+    }
+
+    /**
+     * Admin dapat menolak klaim pending sehingga status klaim menjadi rejected.
+     */
+    public function test_admin_dapat_menolak_klaim(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $klaim = \App\Models\Claim::factory()->create(['status' => 'pending']);
+
+        $response = $this->actingAs($admin)
+            ->post(route('admin.klaim.tolak', $klaim->id));
+
+        $response->assertRedirect(route('admin.dashboard', ['tab' => 'klaim']));
+        $response->assertSessionHas('success');
+
+        $this->assertEquals('rejected', $klaim->fresh()->status);
+    }
+
+    /**
+     * Admin dapat mengunduh data laporan dalam format CSV.
+     */
+    public function test_admin_dapat_export_csv(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Laporan::factory()->create(['judul' => 'Barang Untuk Export CSV']);
+
+        $response = $this->actingAs($admin)->get(route('admin.export.csv'));
+
+        $response->assertStatus(200);
+        $this->assertTrue(str_contains($response->headers->get('content-type'), 'text/csv'));
     }
 }
