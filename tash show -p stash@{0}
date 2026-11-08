@@ -1,0 +1,17 @@
+ app/Http/Controllers/ClaimController.php           | 108 [32m+++[m[31m-[m
+ app/Http/Controllers/DashboardController.php       |  11 [32m+[m[31m-[m
+ resources/views/claims/create.blade.php            |  62 [32m++[m[31m-[m
+ resources/views/claims/incoming.blade.php          | 242 [32m++++++++[m
+ resources/views/claims/index.blade.php             | 179 [32m++++[m[31m--[m
+ resources/views/claims/show.blade.php              | 160 [32m+++++[m[31m-[m
+ resources/views/components/nav-link.blade.php      |   4 [32m+[m[31m-[m
+ .../views/components/responsive-nav-link.blade.php |   4 [32m+[m[31m-[m
+ resources/views/dashboard.blade.php                | 319 [32m+++++++[m[31m----[m
+ resources/views/layouts/app.blade.php              |  12 [32m+[m[31m-[m
+ resources/views/layouts/footer.blade.php           |  75 [32m+++[m
+ resources/views/layouts/navigation.blade.php       | 116 [32m++[m[31m--[m
+ resources/views/reports/index.blade.php            | 613 [32m+++++++++++++++[m[31m------[m
+ routes/web.php                                     |   6 [32m+[m[31m-[m
+ tailwind.config.js                                 |  21 [32m+[m
+ tests/Feature/ClaimTest.php                        | 312 [32m+++++++++++[m
+ 16 files changed, 1852 insertions(+), 392 deletions(-)
