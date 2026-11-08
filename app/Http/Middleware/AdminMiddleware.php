@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,13 +15,15 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $user = $request->user();
+
         // Pastikan pengguna sudah login
-        if (! $request->user()) {
+        if (! $user instanceof User) {
             return redirect()->route('login');
         }
 
         // Periksa role admin dari database, bukan dari input pengguna
-        if (! $request->user()->isAdmin()) {
+        if (! $user->isAdmin()) {
             abort(403, 'Akses ditolak. Halaman ini hanya untuk admin.');
         }
 

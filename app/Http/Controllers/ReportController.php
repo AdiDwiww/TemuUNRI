@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Laporan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
@@ -77,7 +78,7 @@ class ReportController extends Controller
         }
 
         Laporan::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'judul' => $request->judul,
             'tipe' => $request->tipe,
             'kategori' => $request->kategori,
@@ -100,7 +101,7 @@ class ReportController extends Controller
     // Form Edit Laporan (Milik Sendiri, hanya jika status 'pending')
     public function edit(Laporan $report)
     {
-        if ($report->user_id !== auth()->id()) {
+        if ($report->user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses untuk mengedit laporan ini.');
         }
 
@@ -115,7 +116,7 @@ class ReportController extends Controller
     // Update Laporan (hanya jika status 'pending')
     public function update(Request $request, Laporan $report)
     {
-        if ($report->user_id !== auth()->id()) {
+        if ($report->user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses untuk memperbarui laporan ini.');
         }
 
@@ -158,7 +159,7 @@ class ReportController extends Controller
     // Hapus Laporan (Milik Sendiri, hanya jika status 'pending')
     public function destroy(Laporan $report)
     {
-        if ($report->user_id !== auth()->id()) {
+        if ($report->user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses untuk menghapus laporan ini.');
         }
 
