@@ -43,7 +43,7 @@ Route::middleware('auth')->group(function () {
 
 // Rute Admin — dilindungi oleh middleware auth DAN admin (pemeriksaan role di server)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard Admin
+    // Dashboard Admin (mendukung query string: tab, search, status_filter)
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Detail Laporan untuk Admin
@@ -54,6 +54,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Tolak laporan pending → status menjadi 'Ditolak'
     Route::post('/laporan/{laporan}/tolak', [AdminDashboardController::class, 'tolak'])->name('laporan.tolak');
+
+    // Verifikasi klaim oleh admin
+    Route::post('/klaim/{claim}/setujui', [AdminDashboardController::class, 'setujuiKlaim'])->name('klaim.setujui');
+    Route::post('/klaim/{claim}/tolak', [AdminDashboardController::class, 'tolakKlaim'])->name('klaim.tolak');
+
+    // Export laporan ke CSV
+    Route::get('/export/csv', [AdminDashboardController::class, 'exportCsv'])->name('export.csv');
 });
 
 require __DIR__.'/auth.php';
