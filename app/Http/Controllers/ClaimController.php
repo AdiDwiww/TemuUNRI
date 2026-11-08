@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Claim;
 use App\Models\Laporan;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ClaimController extends Controller
@@ -14,7 +16,7 @@ class ClaimController extends Controller
      */
     public function index()
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $claims = Claim::with('laporan')
             ->where('user_id', $userId)
@@ -34,7 +36,7 @@ class ClaimController extends Controller
      */
     public function incoming()
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $claims = Claim::with(['laporan', 'user'])
             ->whereHas('laporan', function ($query) use ($userId) {
@@ -83,7 +85,7 @@ class ClaimController extends Controller
 
         $claim = Claim::create([
             'laporan_id' => $report->id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'description' => $validated['description'],
             'status' => 'pending',
         ]);
@@ -98,7 +100,7 @@ class ClaimController extends Controller
      */
     public function decide(Request $request, Claim $claim)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $claim->load('laporan');
 
         // Keamanan: Hanya pelapor penemuan barang yang boleh memutuskan klaim
@@ -162,8 +164,12 @@ class ClaimController extends Controller
      */
     public function show(Claim $claim)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $claim->load(['laporan.user', 'user']);
+
+        if (! $user instanceof User) {
+            abort(403, 'Akses tidak valid.');
+        }
 
         $bolehLihat = $claim->user_id === $user->id
             || $claim->laporan->user_id === $user->id
@@ -182,7 +188,7 @@ class ClaimController extends Controller
      */
     private function alasanTidakBisaKlaim(Laporan $report): ?string
     {
-        if ($report->user_id === auth()->id()) {
+        if ($report->user_id === Auth::id()) {
             return 'Anda tidak dapat mengklaim laporan milik sendiri.';
         }
 
@@ -195,7 +201,7 @@ class ClaimController extends Controller
         }
 
         $sudahKlaim = Claim::where('laporan_id', $report->id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->exists();
 
         if ($sudahKlaim) {

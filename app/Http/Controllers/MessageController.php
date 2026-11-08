@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MessageController extends Controller
 {
@@ -13,7 +14,7 @@ class MessageController extends Controller
      */
     public function index(Request $request, Conversation $conversation)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         abort_unless($conversation->hasParticipant($user), 403, 'Anda bukan peserta percakapan ini.');
 
@@ -40,7 +41,7 @@ class MessageController extends Controller
      */
     public function store(Request $request, Conversation $conversation)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         abort_unless($conversation->hasParticipant($user), 403, 'Anda bukan peserta percakapan ini.');
 

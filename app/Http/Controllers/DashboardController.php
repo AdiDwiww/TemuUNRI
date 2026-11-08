@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Claim;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -14,7 +15,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Ambil laporan milik pengguna yang sedang login, dengan pagination
         $laporans = Laporan::where('user_id', $user->id)

@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Conversation;
 use App\Models\Laporan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ConversationController extends Controller
 {
     /**
      * Inbox: semua percakapan milik user (sebagai pelapor atau penanya).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
+        $search = trim((string) $request->query('search', ''));
+        $tab = (string) $request->query('tab', 'all');
 
-        $conversations = Conversation::query()
+        $query = Conversation::query()
             ->where(function ($q) use ($user) {
                 $q->where('reporter_id', $user->id)
                   ->orWhere('participant_id', $user->id);
@@ -24,11 +28,46 @@ class ConversationController extends Controller
                 'messages as unread_count' => function ($q) use ($user) {
                     $q->whereNull('read_at')->where('sender_id', '!=', $user->id);
                 },
-            ])
-            ->latest('updated_at')
-            ->paginate(15);
+            ]);
 
-        return view('conversations.index', compact('conversations', 'user'));
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('laporan', function ($laporanQuery) use ($search) {
+                        $laporanQuery->where('judul', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('reporter', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('participant', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($tab === 'unread') {
+            $query->whereHas('messages', function ($messageQuery) use ($user) {
+                $messageQuery->whereNull('read_at')->where('sender_id', '!=', $user->id);
+            });
+        }
+
+        if ($tab === 'claim') {
+            $query->whereHas('laporan', function ($laporanQuery) {
+                $laporanQuery->where('tipe', 'penemuan');
+            });
+        }
+
+        $conversations = $query->latest('updated_at')->paginate(15);
+        $selectedConversation = $conversations->first();
+        $selectedMessages = collect();
+        $lawan = null;
+
+        if ($selectedConversation) {
+            $selectedConversation->load(['laporan', 'reporter', 'participant']);
+            $selectedMessages = $selectedConversation->messages()->oldest('id')->get();
+            $lawan = $selectedConversation->otherUser($user);
+        }
+
+        return view('conversations.index', compact('conversations', 'user', 'search', 'tab', 'selectedConversation', 'selectedMessages', 'lawan'));
     }
 
     /**
@@ -36,7 +75,7 @@ class ConversationController extends Controller
      */
     public function store(Laporan $report)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ((int) $report->user_id === (int) $user->id) {
             return redirect()
@@ -65,13 +104,12 @@ class ConversationController extends Controller
      */
     public function show(Conversation $conversation)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         abort_unless($conversation->hasParticipant($user), 403, 'Anda bukan peserta percakapan ini.');
 
         $conversation->load(['laporan', 'reporter', 'participant']);
 
-        // Tandai pesan dari lawan bicara sebagai sudah dibaca.
         $conversation->messages()
             ->whereNull('read_at')
             ->where('sender_id', '!=', $user->id)
@@ -80,6 +118,20 @@ class ConversationController extends Controller
         $messages = $conversation->messages()->oldest('id')->get();
         $lawan = $conversation->otherUser($user);
 
-        return view('conversations.show', compact('conversation', 'messages', 'lawan', 'user'));
+        $allConversations = Conversation::query()
+            ->where(function ($q) use ($user) {
+                $q->where('reporter_id', $user->id)
+                  ->orWhere('participant_id', $user->id);
+            })
+            ->with(['laporan', 'reporter', 'participant', 'latestMessage'])
+            ->withCount([
+                'messages as unread_count' => function ($q) use ($user) {
+                    $q->whereNull('read_at')->where('sender_id', '!=', $user->id);
+                },
+            ])
+            ->latest('updated_at')
+            ->get();
+
+        return view('conversations.show', compact('conversation', 'messages', 'lawan', 'user', 'allConversations'));
     }
 }
