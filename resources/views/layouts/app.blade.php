@@ -13,6 +13,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @stack('styles')
     </head>
     <body class="font-sans antialiased bg-[#F7F9FC] text-slate-800 min-h-screen flex flex-col">
         <div class="flex-1 flex flex-col">
@@ -34,5 +35,6 @@
         </div>
 
         @include('layouts.footer')
+        @stack('scripts')
     </body>
 </html>
