@@ -63,6 +63,7 @@
                             @if(Auth::user()->foto_profil)
                                 <img src="{{ Storage::url(Auth::user()->foto_profil) }}"
                                      alt="{{ Auth::user()->name }}"
+                                     style="width: 24px; height: 24px; min-width: 24px; min-height: 24px; max-width: 24px; max-height: 24px; object-fit: cover; border-radius: 9999px;"
                                      class="w-6 h-6 rounded-full object-cover me-2" />
                             @else
                                 <div class="w-6 h-6 rounded-full bg-navy-100 text-navy-800 font-bold flex items-center justify-center me-2 text-[11px]">
@@ -150,6 +151,7 @@
                 @if(Auth::user()->foto_profil)
                     <img src="{{ Storage::url(Auth::user()->foto_profil) }}"
                          alt="{{ Auth::user()->name }}"
+                         style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; object-fit: cover; border-radius: 9999px;"
                          class="w-8 h-8 rounded-full object-cover" />
                 @else
                     <div class="w-8 h-8 rounded-full bg-navy-100 text-navy-800 font-bold flex items-center justify-center text-xs">

@@ -304,7 +304,7 @@ class ProfileTest extends TestCase
         $response->assertSessionHasErrorsIn('updatePassword', 'current_password');
     }
 
-    public function test_user_cannot_manipulate_nim(): void
+    public function test_user_can_update_nim(): void
     {
         $user = User::factory()->create(['nim' => '2410111111']);
 
@@ -313,7 +313,7 @@ class ProfileTest extends TestCase
             ->patch('/profile', [
                 'name' => 'Updated Name',
                 'email' => $user->email,
-                'nim' => '2410999999', // mencoba manipulasi NIM
+                'nim' => '2410999999',
                 'fakultas' => 'FMIPA',
                 'program_studi' => 'Informatika',
             ]);
@@ -321,7 +321,45 @@ class ProfileTest extends TestCase
         $response->assertSessionHasNoErrors();
         $user->refresh();
 
-        // NIM harus tetap sama dengan yang awal
+        $this->assertSame('2410999999', $user->nim);
+    }
+
+    public function test_user_cannot_update_nim_to_existing_duplicate_nim(): void
+    {
+        $userA = User::factory()->create(['nim' => '2410111111']);
+        $userB = User::factory()->create(['nim' => '2410222222']);
+
+        $response = $this
+            ->actingAs($userA)
+            ->patch('/profile', [
+                'name' => $userA->name,
+                'email' => $userA->email,
+                'nim' => '2410222222',
+                'fakultas' => 'FMIPA',
+                'program_studi' => 'Informatika',
+            ]);
+
+        $response->assertSessionHasErrors('nim');
+        $userA->refresh();
+        $this->assertSame('2410111111', $userA->nim);
+    }
+
+    public function test_user_can_keep_their_own_nim_when_updating_profile(): void
+    {
+        $user = User::factory()->create(['nim' => '2410111111']);
+
+        $response = $this
+            ->actingAs($user)
+            ->patch('/profile', [
+                'name' => 'Name Changed',
+                'email' => $user->email,
+                'nim' => '2410111111',
+                'fakultas' => 'FMIPA',
+                'program_studi' => 'Informatika',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $user->refresh();
         $this->assertSame('2410111111', $user->nim);
     }
 }
