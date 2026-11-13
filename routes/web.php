@@ -18,6 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Rute CRUD Laporan (Orang 1)
+    Route::patch('/reports/{report}/mark-as-found', [ReportController::class, 'markAsFound'])->name('reports.mark-as-found');
     Route::resource('reports', ReportController::class);
 
     // Rute Klaim
