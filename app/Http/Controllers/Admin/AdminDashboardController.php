@@ -79,10 +79,20 @@ class AdminDashboardController extends Controller
             ->paginate(10, ['*'], 'user_page')
             ->withQueryString();
 
-        $aktivitasTerbaru = Laporan::with('user')
-            ->latest('updated_at')
-            ->take(20)
-            ->get();
+        $queryAktivitas = Laporan::with('user')->latest('updated_at');
+        if ($filterStatus && $filterStatus !== 'ALL') {
+            $statusMap = [
+                'MENUNGGU' => 'pending',
+                'DIPROSES' => 'proses',
+                'SELESAI'  => 'selesai',
+                'DITOLAK'  => 'Ditolak',
+            ];
+            $dbStatus = $statusMap[$filterStatus] ?? null;
+            if ($dbStatus) {
+                $queryAktivitas->where('status', $dbStatus);
+            }
+        }
+        $aktivitasTerbaru = $queryAktivitas->take(20)->get();
 
         return view('admin.dashboard', compact(
             'jumlahPending',
