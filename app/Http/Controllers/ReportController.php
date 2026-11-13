@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Claim;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
@@ -95,6 +97,62 @@ class ReportController extends Controller
     public function show(Laporan $report)
     {
         return view('reports.show', compact('report'));
+    }
+
+    /**
+     * Tandai laporan kehilangan sebagai selesai karena barang sudah ditemukan oleh pemilik.
+     */
+    public function markAsFound(Laporan $report)
+    {
+        // 1. Keamanan: Hanya pemilik laporan yang boleh menandai barang ditemukan
+        if ($report->user_id !== auth()->id()) {
+            abort(403, 'Anda tidak memiliki akses untuk menyelesaikan laporan ini.');
+        }
+
+        // 2. Validasi tipe: Hanya berlaku untuk laporan dengan tipe = 'hilang'
+        if ($report->tipe !== 'hilang') {
+            return redirect()->route('reports.show', $report)
+                ->with('error', 'Hanya laporan kehilangan yang dapat ditandai sebagai ditemukan.');
+        }
+
+        // 3. Validasi status: Hanya dapat digunakan ketika status laporan adalah 'proses'
+        if ($report->status !== 'proses') {
+            return redirect()->route('reports.show', $report)
+                ->with('error', 'Hanya laporan berstatus proses yang dapat ditandai sebagai ditemukan.');
+        }
+
+        return DB::transaction(function () use ($report) {
+            // Kunci record laporan untuk mencegah race condition / perubahan status bersamaan
+            $lockedReport = Laporan::where('id', $report->id)->lockForUpdate()->firstOrFail();
+
+            // Validasi ulang di dalam transaksi
+            if ($lockedReport->user_id !== auth()->id()) {
+                abort(403, 'Anda tidak memiliki akses untuk menyelesaikan laporan ini.');
+            }
+
+            if ($lockedReport->tipe !== 'hilang') {
+                return redirect()->route('reports.show', $lockedReport)
+                    ->with('error', 'Hanya laporan kehilangan yang dapat ditandai sebagai ditemukan.');
+            }
+
+            if ($lockedReport->status !== 'proses') {
+                return redirect()->route('reports.show', $lockedReport)
+                    ->with('error', 'Hanya laporan berstatus proses yang dapat ditandai sebagai ditemukan.');
+            }
+
+            // Ubah status laporan menjadi selesai
+            $lockedReport->update(['status' => 'selesai']);
+
+            // Jika terdapat klaim berstatus pending pada laporan tersebut,
+            // otomatis ubah menjadi rejected agar tidak ada klaim yang menggantung.
+            // Klaim yang sudah accepted atau rejected tidak diubah.
+            Claim::where('laporan_id', $lockedReport->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'rejected']);
+
+            return redirect()->route('reports.show', $lockedReport)
+                ->with('success', 'Laporan berhasil ditandai sebagai selesai. Barang telah ditemukan!');
+        });
     }
 
     // Form Edit Laporan (Milik Sendiri, hanya jika status 'pending')
