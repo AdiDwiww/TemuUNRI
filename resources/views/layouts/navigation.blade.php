@@ -60,9 +60,15 @@
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-2.5 py-1.5 border border-slate-200 text-xs font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 hover:text-navy-800 focus:outline-hidden transition ease-in-out duration-150">
-                            <div class="w-6 h-6 rounded-full bg-navy-100 text-navy-800 font-bold flex items-center justify-center me-2 text-[11px]">
-                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                            </div>
+                            @if(Auth::user()->foto_profil)
+                                <img src="{{ Storage::url(Auth::user()->foto_profil) }}"
+                                     alt="{{ Auth::user()->name }}"
+                                     class="w-6 h-6 rounded-full object-cover me-2" />
+                            @else
+                                <div class="w-6 h-6 rounded-full bg-navy-100 text-navy-800 font-bold flex items-center justify-center me-2 text-[11px]">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                </div>
+                            @endif
                             <div class="max-w-[120px] truncate">{{ Auth::user()->name }}</div>
                             <div class="ms-1.5 text-slate-400">
                                 <svg class="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -141,9 +147,15 @@
         <!-- Pengaturan Akun Mobile -->
         <div class="pt-4 pb-3 border-t border-slate-200 bg-slate-50/50">
             <div class="px-4 flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full bg-navy-100 text-navy-800 font-bold flex items-center justify-center text-xs">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                </div>
+                @if(Auth::user()->foto_profil)
+                    <img src="{{ Storage::url(Auth::user()->foto_profil) }}"
+                         alt="{{ Auth::user()->name }}"
+                         class="w-8 h-8 rounded-full object-cover" />
+                @else
+                    <div class="w-8 h-8 rounded-full bg-navy-100 text-navy-800 font-bold flex items-center justify-center text-xs">
+                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    </div>
+                @endif
                 <div class="overflow-hidden">
                     <div class="font-medium text-sm text-slate-800 truncate">{{ Auth::user()->name }}</div>
                     <div class="font-normal text-xs text-slate-500 truncate">{{ Auth::user()->email }}</div>

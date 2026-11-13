@@ -12,12 +12,51 @@
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
+        {{-- NIM --}}
+        <div class="mt-4">
+            <x-input-label for="nim" value="NIM (Nomor Induk Mahasiswa)" />
+            <x-text-input id="nim" class="block mt-1 w-full" type="text"
+                          name="nim" :value="old('nim')" required autocomplete="off"
+                          pattern="[a-zA-Z0-9]+" title="NIM hanya boleh berisi angka atau huruf" />
+            <x-input-error :messages="$errors->get('nim')" class="mt-2" />
+        </div>
+
         {{-- Email --}}
         <div class="mt-4">
             <x-input-label for="email" value="Alamat Email" />
             <x-text-input id="email" class="block mt-1 w-full" type="email"
                           name="email" :value="old('email')" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        {{-- Fakultas & Program Studi (2 kolom di sm ke atas) --}}
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {{-- Fakultas --}}
+            <div>
+                <x-input-label for="fakultas" value="Fakultas" />
+                <x-text-input id="fakultas" class="block mt-1 w-full" type="text"
+                              name="fakultas" :value="old('fakultas')" required
+                              placeholder="Contoh: Fakultas Teknik" />
+                <x-input-error :messages="$errors->get('fakultas')" class="mt-2" />
+            </div>
+
+            {{-- Program Studi --}}
+            <div>
+                <x-input-label for="program_studi" value="Program Studi" />
+                <x-text-input id="program_studi" class="block mt-1 w-full" type="text"
+                              name="program_studi" :value="old('program_studi')" required
+                              placeholder="Contoh: Teknik Informatika" />
+                <x-input-error :messages="$errors->get('program_studi')" class="mt-2" />
+            </div>
+        </div>
+
+        {{-- Nomor HP --}}
+        <div class="mt-4">
+            <x-input-label for="no_hp" value="Nomor HP (Opsional)" />
+            <x-text-input id="no_hp" class="block mt-1 w-full" type="tel"
+                          name="no_hp" :value="old('no_hp')" autocomplete="tel"
+                          placeholder="Contoh: 08123456789" />
+            <x-input-error :messages="$errors->get('no_hp')" class="mt-2" />
         </div>
 
         {{-- Password --}}
