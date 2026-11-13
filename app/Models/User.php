@@ -26,6 +26,11 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'nim',
+        'fakultas',
+        'program_studi',
+        'no_hp',
+        'foto_profil',
     ];
 
     /**
@@ -55,6 +60,18 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Dapatkan URL foto profil. Jika null, kembalikan URL avatar default.
+     */
+    public function getFotoProfilUrlAttribute(): string
+    {
+        if ($this->foto_profil) {
+            return asset('storage/' . $this->foto_profil);
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random';
     }
 
     public function claims()

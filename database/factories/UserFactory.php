@@ -31,6 +31,23 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'role' => 'user',
+            'nim' => '2410' . fake()->unique()->numerify('######'),
+            'fakultas' => fake()->randomElement([
+                'Fakultas Teknik',
+                'Fakultas Ekonomi dan Bisnis',
+                'Fakultas Hukum',
+                'Fakultas Keguruan dan Ilmu Pendidikan',
+                'Fakultas Matematika dan Ilmu Pengetahuan Alam',
+            ]),
+            'program_studi' => fake()->randomElement([
+                'Teknik Informatika',
+                'Sistem Informasi',
+                'Teknik Elektro',
+                'Manajemen',
+                'Akuntansi',
+            ]),
+            'no_hp' => fake()->optional()->numerify('08##########'),
+            'foto_profil' => null,
         ];
     }
 
@@ -51,6 +68,16 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => 'admin',
+        ]);
+    }
+
+    /**
+     * State: set custom NIM.
+     */
+    public function nim(string $nim): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'nim' => $nim,
         ]);
     }
 }
