@@ -74,12 +74,13 @@
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
-        {{-- NIM (readonly) --}}
+        {{-- NIM --}}
         <div>
             <x-input-label for="nim" value="NIM (Nomor Induk Mahasiswa)" />
-            <x-text-input id="nim" name="nim_display" type="text" class="mt-1 block w-full bg-gray-50"
-                          :value="$user->nim ?? '-'" readonly />
-            <p class="mt-1 text-xs text-gray-500">NIM tidak dapat diubah.</p>
+            <x-text-input id="nim" name="nim" type="text" class="mt-1 block w-full"
+                          :value="old('nim', $user->nim)" required
+                          placeholder="Contoh: 2410123456" />
+            <x-input-error class="mt-2" :messages="$errors->get('nim')" />
         </div>
 
         {{-- Email --}}
