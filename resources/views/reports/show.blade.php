@@ -82,6 +82,10 @@
                         && $report->status === 'proses'
                         && ! $klaimSaya;
                     $bisaChat = auth()->check() && $report->user_id !== auth()->id();
+                    $bisaTandaiDitemukan = auth()->check()
+                        && $report->user_id === auth()->id()
+                        && $report->tipe === 'hilang'
+                        && $report->status === 'proses';
                 @endphp
 
                 <div class="pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -90,6 +94,19 @@
                     </a>
 
                     <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
+                        @if($bisaTandaiDitemukan)
+                            <form method="POST" action="{{ route('reports.mark-as-found', $report) }}" onsubmit="return confirm('Apakah kamu yakin barang ini sudah ditemukan? Laporan akan dipindahkan ke riwayat dan tidak lagi tampil sebagai laporan aktif.');">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-md text-sm font-semibold shadow transition">
+                                    <svg class="w-4 h-4 me-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Barang Ditemukan
+                                </button>
+                            </form>
+                        @endif
+
                         @if($klaimSaya)
                             <a href="{{ route('claims.show', $klaimSaya) }}" class="w-full sm:w-auto text-center bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-6 py-2.5 rounded-md text-sm font-semibold transition">
                                 Lihat Klaim Saya
