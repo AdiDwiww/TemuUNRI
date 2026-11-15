@@ -479,4 +479,66 @@ class AdminTest extends TestCase
         $response->assertStatus(200);
         $this->assertTrue(str_contains($response->headers->get('content-type'), 'text/csv'));
     }
+
+    /**
+     * Admin dapat melakukan takedown laporan yang berstatus proses dari beranda.
+     */
+    public function test_admin_dapat_takedown_postingan_berstatus_proses(): void
+    {
+        $admin   = User::factory()->admin()->create();
+        $laporan = Laporan::factory()->proses()->create(['judul' => 'Barang Ditakedown']);
+
+        $response = $this->actingAs($admin)
+            ->post(route('admin.laporan.takedown', $laporan->id));
+
+        $response->assertSessionHas('success');
+        $this->assertEquals('Ditolak', $laporan->fresh()->status);
+    }
+
+    /**
+     * Admin dapat menghapus postingan berstatus proses via route admin.
+     */
+    public function test_admin_dapat_hapus_postingan_berstatus_proses(): void
+    {
+        $admin   = User::factory()->admin()->create();
+        $laporan = Laporan::factory()->proses()->create();
+
+        $response = $this->actingAs($admin)
+            ->delete(route('admin.laporan.destroy', $laporan->id));
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseMissing('laporans', ['id' => $laporan->id]);
+    }
+
+    /**
+     * Admin dapat menghapus postingan milik pengguna manapun via route resource reports.destroy.
+     */
+    public function test_admin_dapat_hapus_postingan_via_reports_destroy(): void
+    {
+        $admin   = User::factory()->admin()->create();
+        $user    = User::factory()->create();
+        $laporan = Laporan::factory()->proses()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($admin)
+            ->delete(route('reports.destroy', $laporan->id));
+
+        $response->assertRedirect(route('reports.index'));
+        $this->assertDatabaseMissing('laporans', ['id' => $laporan->id]);
+    }
+
+    /**
+     * Pengguna biasa tidak dapat melakukan takedown postingan.
+     */
+    public function test_pengguna_biasa_tidak_dapat_takedown_postingan(): void
+    {
+        $user    = User::factory()->create();
+        $laporan = Laporan::factory()->proses()->create();
+
+        $response = $this->actingAs($user)
+            ->post(route('admin.laporan.takedown', $laporan->id));
+
+        $response->assertStatus(403);
+        $this->assertEquals('proses', $laporan->fresh()->status);
+    }
 }

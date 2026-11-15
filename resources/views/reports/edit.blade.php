@@ -1,4 +1,8 @@
 <x-app-layout>
+    @push('styles')
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    @endpush
+
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
@@ -235,15 +239,36 @@
 
                         {{-- Dropzone Upload Foto Baru --}}
                         <div class="border-2 border-dashed border-slate-300 hover:border-navy-800 rounded-2xl p-6 text-center transition-colors bg-slate-50/60" id="dropzone">
-                            {{-- Area Preview Ketika Foto Terpilih --}}
-                            <div id="preview-container" class="hidden mb-4">
-                                <img id="foto-preview-img" src="#" alt="Preview Foto Baru" class="max-h-56 mx-auto rounded-xl object-contain shadow-sm border border-slate-200">
-                                <button type="button" id="remove-preview-btn" class="mt-2.5 inline-flex items-center text-xs font-semibold text-rose-600 hover:text-rose-700">
-                                    <svg class="w-3.5 h-3.5 me-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    Batalkan Foto Baru
-                                </button>
+                            {{-- Area Preview Ketika Foto Terpilih & Dicrop (Rasio 4:5) --}}
+                            <div id="preview-container" class="hidden mb-2">
+                                <div class="relative mx-auto rounded-xl overflow-hidden border border-slate-200/90 shadow-sm bg-slate-900/5" style="width: 200px; aspect-ratio: 4 / 5;">
+                                    <img id="foto-preview-img" src="#" alt="Preview Foto Baru 4:5"
+                                         style="aspect-ratio: 4 / 5; object-fit: cover;"
+                                         class="w-full h-full object-cover">
+                                    <span class="absolute top-2.5 start-2.5 inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-600 text-white shadow-xs">
+                                        <svg class="w-3 h-3 me-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Foto Baru (4:5)
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center justify-center gap-2 mt-3.5">
+                                    <button type="button" id="recrop-btn"
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-2xs transition-colors">
+                                        <svg class="w-3.5 h-3.5 me-1 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Sesuaikan Crop
+                                    </button>
+                                    <button type="button" id="remove-preview-btn"
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 shadow-2xs transition-colors">
+                                        <svg class="w-3.5 h-3.5 me-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Batalkan Foto Baru
+                                    </button>
+                                </div>
                             </div>
 
                             {{-- Area Placeholder Upload --}}
@@ -259,7 +284,7 @@
                                     </label>
                                     <span class="text-slate-500">atau seret file ke sini</span>
                                 </div>
-                                <p class="text-[11px] text-slate-400">Mendukung format JPG, JPEG, PNG, WEBP (Maksimal 2 MB). Kosongkan jika tidak mengganti foto.</p>
+                                <p class="text-[11px] text-slate-400">Mendukung format JPG, JPEG, PNG, WEBP (Maksimal 2 MB). Otomatis dipotong ke rasio 4:5. Kosongkan jika tidak mengganti foto.</p>
                             </div>
 
                             <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden">
@@ -288,96 +313,57 @@
         </div>
     </div>
 
-    {{-- Script Interaksi UI: Tipe Selector & Preview Foto --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Tipe Selector Card Interactive Highlight
-            const tipeCards = document.querySelectorAll('.tipe-card');
-            tipeCards.forEach(card => {
-                const radio = card.querySelector('input[type="radio"]');
-                card.addEventListener('click', function () {
-                    tipeCards.forEach(c => {
-                        const r = c.querySelector('input[type="radio"]');
-                        const check = c.querySelector('.radio-check');
-                        if (r.value === 'hilang') {
-                            c.classList.remove('border-rose-500', 'bg-rose-50/40', 'text-rose-950');
-                            c.classList.add('border-slate-200', 'bg-white', 'text-slate-700');
+    {{-- Reusable Image Cropper Modal --}}
+    <x-image-cropper-modal />
+
+    @push('scripts')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+        <script src="{{ asset('js/image-cropper.js') }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Tipe Selector Card Interactive Highlight
+                const tipeCards = document.querySelectorAll('.tipe-card');
+                tipeCards.forEach(card => {
+                    const radio = card.querySelector('input[type="radio"]');
+                    card.addEventListener('click', function () {
+                        tipeCards.forEach(c => {
+                            const r = c.querySelector('input[type="radio"]');
+                            const check = c.querySelector('.radio-check');
+                            if (r.value === 'hilang') {
+                                c.classList.remove('border-rose-500', 'bg-rose-50/40', 'text-rose-950');
+                                c.classList.add('border-slate-200', 'bg-white', 'text-slate-700');
+                            } else {
+                                c.classList.remove('border-emerald-500', 'bg-emerald-50/40', 'text-emerald-950');
+                                c.classList.add('border-slate-200', 'bg-white', 'text-slate-700');
+                            }
+                            if (check) check.classList.add('hidden');
+                        });
+
+                        radio.checked = true;
+                        const activeCheck = card.querySelector('.radio-check');
+                        if (activeCheck) activeCheck.classList.remove('hidden');
+
+                        if (radio.value === 'hilang') {
+                            card.classList.add('border-rose-500', 'bg-rose-50/40', 'text-rose-950');
+                            card.classList.remove('border-slate-200', 'bg-white', 'text-slate-700');
                         } else {
-                            c.classList.remove('border-emerald-500', 'bg-emerald-50/40', 'text-emerald-950');
-                            c.classList.add('border-slate-200', 'bg-white', 'text-slate-700');
+                            card.classList.add('border-emerald-500', 'bg-emerald-50/40', 'text-emerald-950');
+                            card.classList.remove('border-slate-200', 'bg-white', 'text-slate-700');
                         }
-                        if (check) check.classList.add('hidden');
                     });
+                });
 
-                    radio.checked = true;
-                    const activeCheck = card.querySelector('.radio-check');
-                    if (activeCheck) activeCheck.classList.remove('hidden');
-
-                    if (radio.value === 'hilang') {
-                        card.classList.add('border-rose-500', 'bg-rose-50/40', 'text-rose-950');
-                        card.classList.remove('border-slate-200', 'bg-white', 'text-slate-700');
-                    } else {
-                        card.classList.add('border-emerald-500', 'bg-emerald-50/40', 'text-emerald-950');
-                        card.classList.remove('border-slate-200', 'bg-white', 'text-slate-700');
-                    }
+                // Inisialisasi Image Cropper 4:5
+                initImageCropper({
+                    fileInputId: 'foto',
+                    dropzoneId: 'dropzone',
+                    uploadPlaceholderId: 'upload-placeholder',
+                    previewContainerId: 'preview-container',
+                    previewImgId: 'foto-preview-img',
+                    removePreviewBtnId: 'remove-preview-btn',
+                    reCropBtnId: 'recrop-btn',
                 });
             });
-
-            // Live Image Preview & Drag and Drop
-            const fotoInput = document.getElementById('foto');
-            const previewContainer = document.getElementById('preview-container');
-            const previewImg = document.getElementById('foto-preview-img');
-            const uploadPlaceholder = document.getElementById('upload-placeholder');
-            const removePreviewBtn = document.getElementById('remove-preview-btn');
-            const dropzone = document.getElementById('dropzone');
-
-            function handleFile(file) {
-                if (file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        previewImg.src = e.target.result;
-                        previewContainer.classList.remove('hidden');
-                        uploadPlaceholder.classList.add('hidden');
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
-
-            if (fotoInput) {
-                fotoInput.addEventListener('change', function () {
-                    if (this.files && this.files[0]) {
-                        handleFile(this.files[0]);
-                    }
-                });
-            }
-
-            if (removePreviewBtn) {
-                removePreviewBtn.addEventListener('click', function () {
-                    fotoInput.value = '';
-                    previewImg.src = '#';
-                    previewContainer.classList.add('hidden');
-                    uploadPlaceholder.classList.remove('hidden');
-                });
-            }
-
-            if (dropzone) {
-                dropzone.addEventListener('dragover', function (e) {
-                    e.preventDefault();
-                    dropzone.classList.add('border-navy-800', 'bg-navy-50/30');
-                });
-                dropzone.addEventListener('dragleave', function (e) {
-                    e.preventDefault();
-                    dropzone.classList.remove('border-navy-800', 'bg-navy-50/30');
-                });
-                dropzone.addEventListener('drop', function (e) {
-                    e.preventDefault();
-                    dropzone.classList.remove('border-navy-800', 'bg-navy-50/30');
-                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                        fotoInput.files = e.dataTransfer.files;
-                        handleFile(e.dataTransfer.files[0]);
-                    }
-                });
-            }
-        });
-    </script>
+        </script>
+    @endpush
 </x-app-layout>

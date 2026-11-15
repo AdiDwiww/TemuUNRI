@@ -233,11 +233,38 @@
                                 </button>
                             </form>
                         </div>
+                    @elseif($laporan->status === 'proses')
+                        <p class="text-xs text-slate-500 mb-4">Postingan ini sedang aktif tampil di beranda publik. Anda dapat men-takedown dari beranda atau menghapus postingan ini secara permanen.</p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <form action="{{ route('admin.laporan.takedown', $laporan->id) }}" method="POST" class="flex-1"
+                                  onsubmit="return confirm('Takedown postingan &quot;{{ addslashes($laporan->judul) }}&quot; dari beranda publik? Laporan tidak akan lagi tampil di publik.')">
+                                @csrf
+                                <button type="submit"
+                                        class="w-full bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-xs transition-all flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                    </svg>
+                                    Takedown dari Beranda
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.laporan.destroy', $laporan->id) }}" method="POST" class="flex-1"
+                                  onsubmit="return confirm('Hapus postingan &quot;{{ addslashes($laporan->judul) }}&quot; secara permanen? Seluruh data laporan akan dihapus.')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="w-full bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-xs transition-all flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Hapus Postingan Permanen
+                                </button>
+                            </form>
+                        </div>
                     @else
                         <p class="text-center text-sm text-slate-400 italic py-4">
-                            Laporan sudah diproses dengan status
+                            Laporan berstatus
                             <span class="font-semibold text-slate-600">{{ $statusConfig['label'] }}</span>.
-                            Tidak ada tindakan lebih lanjut.
+                            Tidak ada tindakan lebih lanjut yang diperlukan.
                         </p>
                     @endif
                 </div>
