@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 
 class AdminDashboardController extends Controller
 {
@@ -141,6 +142,37 @@ class AdminDashboardController extends Controller
 
         return redirect()->route('admin.dashboard')
             ->with('success', "Laporan \"{$laporan->judul}\" telah ditolak.");
+    }
+
+    /**
+     * Takedown laporan aktif di beranda: ubah status 'proses' menjadi 'Ditolak'.
+     */
+    public function takedown(Laporan $laporan)
+    {
+        if ($laporan->status !== 'proses') {
+            return redirect()->back()
+                ->with('error', 'Hanya laporan yang aktif di beranda (berstatus diproses) yang dapat di-takedown.');
+        }
+
+        $laporan->update(['status' => 'Ditolak']);
+
+        return redirect()->back()
+            ->with('success', "Postingan \"{$laporan->judul}\" berhasil di-takedown dari beranda.");
+    }
+
+    /**
+     * Admin: Hapus postingan/laporan secara permanen.
+     */
+    public function destroy(Laporan $laporan)
+    {
+        if ($laporan->foto) {
+            Storage::disk('public')->delete($laporan->foto);
+        }
+
+        $laporan->delete();
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', "Postingan \"{$laporan->judul}\" berhasil dihapus.");
     }
 
     /**
