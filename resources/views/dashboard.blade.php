@@ -322,12 +322,16 @@
                                                 Detail
                                             </a>
 
-                                            {{-- Tombol Edit & Hapus hanya untuk laporan berstatus 'pending' --}}
+                                            {{-- Tombol Edit hanya untuk laporan berstatus 'pending' --}}
                                             @if($laporan->status === 'pending')
                                                 <a href="{{ route('reports.edit', $laporan->id) }}"
                                                    class="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors inline-flex items-center">
                                                     Edit
                                                 </a>
+                                            @endif
+
+                                            {{-- Tombol Hapus untuk laporan berstatus 'pending' dan 'proses' (di beranda) --}}
+                                            @if(in_array($laporan->status, ['pending', 'proses']))
                                                 <form action="{{ route('reports.destroy', $laporan->id) }}"
                                                       method="POST" class="inline">
                                                     @csrf

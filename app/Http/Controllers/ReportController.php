@@ -70,7 +70,11 @@ class ReportController extends Controller
             'deskripsi' => 'required',
             'lokasi' => 'required|string',
             'tanggal_kejadian' => 'required|date',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048', $this->validateFotoRatio()],
+        ], [
+            'foto.image' => 'File yang diunggah harus berupa gambar.',
+            'foto.mimes' => 'Format foto harus berupa JPG, JPEG, PNG, atau WEBP.',
+            'foto.max'   => 'Ukuran foto maksimal 2 MB.',
         ]);
 
         $path = null;
@@ -189,7 +193,11 @@ class ReportController extends Controller
             'deskripsi' => 'required',
             'lokasi' => 'required|string',
             'tanggal_kejadian' => 'required|date',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048', $this->validateFotoRatio()],
+        ], [
+            'foto.image' => 'File yang diunggah harus berupa gambar.',
+            'foto.mimes' => 'Format foto harus berupa JPG, JPEG, PNG, atau WEBP.',
+            'foto.max'   => 'Ukuran foto maksimal 2 MB.',
         ]);
 
         $path = $report->foto;
@@ -213,16 +221,21 @@ class ReportController extends Controller
         return redirect()->route('reports.index')->with('success', 'Laporan berhasil diperbarui.');
     }
 
-    // Hapus Laporan (Milik Sendiri, hanya jika status 'pending')
+    // Hapus Laporan (Pemilik jika pending/proses di beranda, atau Admin)
     public function destroy(Laporan $report)
     {
-        if ($report->user_id !== auth()->id()) {
+        $user = auth()->user();
+        $isOwner = $user && $report->user_id === $user->id;
+        $isAdmin = $user && $user->isAdmin();
+
+        if (!$isOwner && !$isAdmin) {
             abort(403, 'Anda tidak memiliki akses untuk menghapus laporan ini.');
         }
 
-        if ($report->status !== 'pending') {
+        // Pengguna biasa hanya boleh menghapus laporan berstatus 'pending' atau 'proses' (sudah di beranda)
+        if (!$isAdmin && !in_array($report->status, ['pending', 'proses'])) {
             return redirect()->route('reports.show', $report->id)
-                ->with('error', 'Laporan tidak dapat dihapus karena statusnya sudah bukan "Menunggu".');
+                ->with('error', 'Laporan tidak dapat dihapus karena statusnya sudah bukan "Menunggu" atau "Diproses".');
         }
 
         if ($report->foto) {
@@ -231,6 +244,38 @@ class ReportController extends Controller
 
         $report->delete();
 
+        if ($isAdmin && request()->routeIs('admin.*')) {
+            return redirect()->route('admin.dashboard')->with('success', 'Laporan berhasil dihapus.');
+        }
+
         return redirect()->route('reports.index')->with('success', 'Laporan berhasil dihapus.');
+    }
+
+    /**
+     * Aturan validasi rasio aspek 4:5 untuk foto barang.
+     */
+    private function validateFotoRatio(): \Closure
+    {
+        return function ($attribute, $value, $fail) {
+            if (!$value || !$value->isValid()) {
+                return;
+            }
+            $dimensions = @getimagesize($value->getRealPath());
+            if (!$dimensions) {
+                $fail('File yang diunggah bukan gambar yang valid.');
+                return;
+            }
+            [$width, $height] = $dimensions;
+            if ($height <= 0) {
+                $fail('Dimensi gambar tidak valid.');
+                return;
+            }
+            $ratio = $width / $height;
+            $targetRatio = 4 / 5; // 0.8
+            // Toleransi 0.03 untuk mengantisipasi pembulatan piksel
+            if (abs($ratio - $targetRatio) > 0.03) {
+                $fail('Foto barang harus memiliki rasio aspek 4:5 (portrait). Silakan gunakan fitur crop yang tersedia.');
+            }
+        };
     }
 }

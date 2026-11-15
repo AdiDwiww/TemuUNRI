@@ -57,6 +57,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Tolak laporan pending → status menjadi 'Ditolak'
     Route::post('/laporan/{laporan}/tolak', [AdminDashboardController::class, 'tolak'])->name('laporan.tolak');
 
+    // Takedown laporan aktif di beranda → status menjadi 'Ditolak'
+    Route::post('/laporan/{laporan}/takedown', [AdminDashboardController::class, 'takedown'])->name('laporan.takedown');
+
+    // Hapus laporan oleh admin secara permanen
+    Route::delete('/laporan/{laporan}', [AdminDashboardController::class, 'destroy'])->name('laporan.destroy');
+
     // Verifikasi klaim oleh admin
     Route::post('/klaim/{claim}/setujui', [AdminDashboardController::class, 'setujuiKlaim'])->name('klaim.setujui');
     Route::post('/klaim/{claim}/tolak', [AdminDashboardController::class, 'tolakKlaim'])->name('klaim.tolak');

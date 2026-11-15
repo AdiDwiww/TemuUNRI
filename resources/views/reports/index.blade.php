@@ -312,12 +312,13 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                         @foreach($laporans as $laporan)
                             <article class="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden group">
-                                <!-- Foto Barang / Fallback -->
-                                <div class="relative w-full aspect-16/10 bg-slate-100 overflow-hidden border-b border-slate-100">
+                                <!-- Foto Barang / Fallback (Rasio 4:5 Portrait) -->
+                                <div class="relative w-full aspect-[4/5] bg-slate-100 overflow-hidden border-b border-slate-100" style="aspect-ratio: 4 / 5;">
                                     @if($laporan->foto)
                                         <img
                                             src="{{ asset('storage/' . $laporan->foto) }}"
                                             alt="{{ $laporan->judul }}"
+                                            style="object-fit: cover;"
                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             loading="lazy"
                                         >
@@ -417,15 +418,17 @@
 
                                         @if($laporan->user_id == auth()->id())
                                             <div class="flex items-center space-x-1 shrink-0">
-                                                <a
-                                                    href="{{ route('reports.edit', $laporan->id) }}"
-                                                    class="p-2 rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
-                                                    title="Edit Laporan"
-                                                >
-                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </a>
+                                                @if($laporan->status === 'pending')
+                                                    <a
+                                                        href="{{ route('reports.edit', $laporan->id) }}"
+                                                        class="p-2 rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
+                                                        title="Edit Laporan"
+                                                    >
+                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                    </a>
+                                                @endif
 
                                                 <form action="{{ route('reports.destroy', $laporan->id) }}" method="POST" class="inline">
                                                     @csrf
@@ -435,6 +438,39 @@
                                                         class="p-2 rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors"
                                                         onclick="return confirm('Apakah Anda yakin ingin menghapus laporan ini?')"
                                                         title="Hapus Laporan"
+                                                    >
+                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @elseif(auth()->check() && auth()->user()->isAdmin())
+                                            <div class="flex items-center space-x-1 shrink-0">
+                                                {{-- Tombol Takedown Admin dari Beranda --}}
+                                                <form action="{{ route('admin.laporan.takedown', $laporan->id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <button
+                                                        type="submit"
+                                                        class="p-2 rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
+                                                        onclick="return confirm('Takedown postingan &quot;{{ addslashes($laporan->judul) }}&quot; dari beranda? Postingan tidak akan lagi tampil di publik.')"
+                                                        title="Takedown Postingan dari Beranda"
+                                                    >
+                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+
+                                                {{-- Tombol Hapus Permanen Admin --}}
+                                                <form action="{{ route('admin.laporan.destroy', $laporan->id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button
+                                                        type="submit"
+                                                        class="p-2 rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors"
+                                                        onclick="return confirm('Hapus postingan &quot;{{ addslashes($laporan->judul) }}&quot; secara permanen?')"
+                                                        title="Hapus Postingan Permanen"
                                                     >
                                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

@@ -158,18 +158,18 @@ class LaporanAksesTest extends TestCase
     }
 
     /**
-     * Pemilik tidak bisa menghapus laporan berstatus 'proses'.
+     * Pemilik bisa menghapus laporan berstatus 'proses' yang sudah masuk beranda tanpa persetujuan admin.
      */
-    public function test_pemilik_tidak_bisa_hapus_laporan_berstatus_proses(): void
+    public function test_pemilik_bisa_hapus_laporan_berstatus_proses(): void
     {
         $user    = User::factory()->create();
         $laporan = Laporan::factory()->proses()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->delete(route('reports.destroy', $laporan->id));
 
-        $response->assertRedirect(route('reports.show', $laporan->id));
-        // Laporan masih ada di database
-        $this->assertDatabaseHas('laporans', ['id' => $laporan->id]);
+        $response->assertRedirect(route('reports.index'));
+        // Laporan berhasil dihapus dari database
+        $this->assertDatabaseMissing('laporans', ['id' => $laporan->id]);
     }
 
     /**

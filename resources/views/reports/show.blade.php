@@ -86,6 +86,12 @@
                         && $report->user_id === auth()->id()
                         && $report->tipe === 'hilang'
                         && $report->status === 'proses';
+                    $bisaHapus = auth()->check() && (
+                        ($report->user_id === auth()->id() && in_array($report->status, ['pending', 'proses']))
+                        || auth()->user()->isAdmin()
+                    );
+                    $bisaTakedownAdmin = auth()->check() && auth()->user()->isAdmin() && $report->status === 'proses';
+                    $bisaEdit = auth()->check() && $report->user_id === auth()->id() && $report->status === 'pending';
                 @endphp
 
                 <div class="pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -130,6 +136,31 @@
                                     Chat Pelapor
                                 </button>
                             @endif
+                        @endif
+
+                        @if($bisaEdit)
+                            <a href="{{ route('reports.edit', $report) }}" class="w-full sm:w-auto text-center bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold shadow transition">
+                                Edit Laporan
+                            </a>
+                        @endif
+
+                        @if($bisaTakedownAdmin)
+                            <form method="POST" action="{{ route('admin.laporan.takedown', $report) }}" onsubmit="return confirm('Takedown postingan &quot;{{ addslashes($report->judul) }}&quot; dari beranda publik?');">
+                                @csrf
+                                <button type="submit" class="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-md text-sm font-semibold shadow transition">
+                                    Takedown dari Beranda
+                                </button>
+                            </form>
+                        @endif
+
+                        @if($bisaHapus)
+                            <form method="POST" action="{{ route('reports.destroy', $report) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus laporan ini secara permanen? Tindakan ini tidak dapat dibatalkan.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white px-5 py-2.5 rounded-md text-sm font-semibold shadow transition">
+                                    Hapus Laporan
+                                </button>
+                            </form>
                         @endif
                     </div>
                 </div>
