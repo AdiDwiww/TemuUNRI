@@ -42,7 +42,29 @@ class ReportController extends Controller
             }
         }
 
-        $laporans = $query->paginate(10); // Pagination daftar laporan[cite: 4]
+        $laporans = $query->paginate(10)->withQueryString(); // Pagination daftar laporan
+
+        // Respons AJAX Asynchronous untuk Live Search & Filter Dinamis
+        if ($request->ajax() || $request->wantsJson()) {
+            $html = view('reports.partials.report-list', compact('laporans'))->render();
+
+            return response()->json([
+                'status'  => 'success',
+                'success' => true,
+                'message' => 'Daftar laporan berhasil dimuat.',
+                'total'   => $laporans->total(),
+                'html'    => $html,
+                'data'    => [
+                    'total'          => $laporans->total(),
+                    'current_page'   => $laporans->currentPage(),
+                    'last_page'      => $laporans->lastPage(),
+                    'per_page'       => $laporans->perPage(),
+                    'from'           => $laporans->firstItem(),
+                    'to'             => $laporans->lastItem(),
+                    'has_more_pages' => $laporans->hasMorePages(),
+                ],
+            ]);
+        }
 
         // Pengelompokan untuk Beranda:
         // Laporan aktif hanya yang berstatus 'proses'

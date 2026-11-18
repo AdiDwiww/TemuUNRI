@@ -17,7 +17,7 @@ class MessageController extends Controller
 
         abort_unless($conversation->hasParticipant($user), 403, 'Anda bukan peserta percakapan ini.');
 
-        $after = (int) $request->query('after', 0);
+        $after = (int) $request->query('after', $request->query('after_id', 0));
 
         $messages = $conversation->messages()
             ->where('id', '>', $after)
@@ -31,6 +31,8 @@ class MessageController extends Controller
             ->update(['read_at' => now()]);
 
         return response()->json([
+            'status'   => 'success',
+            'success'  => true,
             'messages' => $messages->map(fn (Message $m) => $this->format($m, $user->id))->values(),
         ]);
     }
@@ -56,8 +58,12 @@ class MessageController extends Controller
         // Naikkan percakapan ke atas inbox.
         $conversation->touch();
 
-        if ($request->expectsJson()) {
-            return response()->json(['message' => $this->format($message, $user->id)], 201);
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'status'  => 'success',
+                'success' => true,
+                'message' => $this->format($message, $user->id),
+            ], 201);
         }
 
         return redirect()->route('conversations.show', $conversation);
