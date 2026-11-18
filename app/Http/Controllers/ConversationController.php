@@ -118,7 +118,12 @@ class ConversationController extends Controller
         $messages = $conversation->messages()->oldest('id')->get();
         $lawan = $conversation->otherUser($user);
 
+<<<<<<< Updated upstream
         $allConversations = Conversation::query()
+=======
+        // Muat daftar percakapan untuk panel kiri (sama dengan index).
+        $conversations = Conversation::query()
+>>>>>>> Stashed changes
             ->where(function ($q) use ($user) {
                 $q->where('reporter_id', $user->id)
                   ->orWhere('participant_id', $user->id);
@@ -130,8 +135,14 @@ class ConversationController extends Controller
                 },
             ])
             ->latest('updated_at')
+<<<<<<< Updated upstream
             ->get();
 
         return view('conversations.show', compact('conversation', 'messages', 'lawan', 'user', 'allConversations'));
+=======
+            ->paginate(15);
+
+        return view('conversations.show', compact('conversation', 'conversations', 'messages', 'lawan', 'user'));
+>>>>>>> Stashed changes
     }
 }
