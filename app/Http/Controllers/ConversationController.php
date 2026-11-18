@@ -80,6 +80,21 @@ class ConversationController extends Controller
         $messages = $conversation->messages()->oldest('id')->get();
         $lawan = $conversation->otherUser($user);
 
-        return view('conversations.show', compact('conversation', 'messages', 'lawan', 'user'));
+        // Muat daftar percakapan untuk panel kiri (sama dengan index).
+        $conversations = Conversation::query()
+            ->where(function ($q) use ($user) {
+                $q->where('reporter_id', $user->id)
+                  ->orWhere('participant_id', $user->id);
+            })
+            ->with(['laporan', 'reporter', 'participant', 'latestMessage'])
+            ->withCount([
+                'messages as unread_count' => function ($q) use ($user) {
+                    $q->whereNull('read_at')->where('sender_id', '!=', $user->id);
+                },
+            ])
+            ->latest('updated_at')
+            ->paginate(15);
+
+        return view('conversations.show', compact('conversation', 'conversations', 'messages', 'lawan', 'user'));
     }
 }
