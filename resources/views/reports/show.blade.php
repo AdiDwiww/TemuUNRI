@@ -91,6 +91,7 @@
                         || auth()->user()->isAdmin()
                     );
                     $bisaTakedownAdmin = auth()->check() && auth()->user()->isAdmin() && $report->status === 'proses';
+                    $bisaSelesaikanAdmin = auth()->check() && auth()->user()->isAdmin() && $report->status === 'proses' && ! $bisaTandaiDitemukan;
                     $bisaEdit = auth()->check() && $report->user_id === auth()->id() && $report->status === 'pending';
                 @endphp
 
@@ -142,6 +143,18 @@
                             <a href="{{ route('reports.edit', $report) }}" class="w-full sm:w-auto text-center bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold shadow transition">
                                 Edit Laporan
                             </a>
+                        @endif
+
+                        @if($bisaSelesaikanAdmin)
+                            <form method="POST" action="{{ route('admin.laporan.selesai', $report) }}" onsubmit="return confirm('Tandai laporan &quot;{{ addslashes($report->judul) }}&quot; sebagai selesai? Laporan akan dipindahkan ke riwayat.');">
+                                @csrf
+                                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-md text-sm font-semibold shadow transition">
+                                    <svg class="w-4 h-4 me-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Tandai Selesai
+                                </button>
+                            </form>
                         @endif
 
                         @if($bisaTakedownAdmin)

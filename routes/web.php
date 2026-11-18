@@ -60,6 +60,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Takedown laporan aktif di beranda → status menjadi 'Ditolak'
     Route::post('/laporan/{laporan}/takedown', [AdminDashboardController::class, 'takedown'])->name('laporan.takedown');
 
+    // Tandai laporan aktif/proses menjadi 'selesai'
+    Route::post('/laporan/{laporan}/selesai', [AdminDashboardController::class, 'selesaikan'])->name('laporan.selesai');
+
     // Hapus laporan oleh admin secara permanen
     Route::delete('/laporan/{laporan}', [AdminDashboardController::class, 'destroy'])->name('laporan.destroy');
 

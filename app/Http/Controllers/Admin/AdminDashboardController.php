@@ -161,6 +161,29 @@ class AdminDashboardController extends Controller
     }
 
     /**
+     * Tandai laporan aktif ('proses') menjadi 'selesai'.
+     */
+    public function selesaikan(Laporan $laporan)
+    {
+        if ($laporan->status !== 'proses') {
+            return redirect()->back()
+                ->with('error', 'Hanya laporan yang sedang diproses yang dapat ditandai selesai.');
+        }
+
+        DB::transaction(function () use ($laporan) {
+            $laporan->update(['status' => 'selesai']);
+
+            // Tolak semua klaim pending pada laporan ini agar tidak menggantung
+            Claim::where('laporan_id', $laporan->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'rejected']);
+        });
+
+        return redirect()->back()
+            ->with('success', "Laporan \"{$laporan->judul}\" berhasil ditandai sebagai selesai.");
+    }
+
+    /**
      * Admin: Hapus postingan/laporan secara permanen.
      */
     public function destroy(Laporan $laporan)

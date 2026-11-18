@@ -541,4 +541,34 @@ class AdminTest extends TestCase
         $response->assertStatus(403);
         $this->assertEquals('proses', $laporan->fresh()->status);
     }
+
+    /**
+     * Admin dapat menandai laporan yang berstatus proses menjadi selesai.
+     */
+    public function test_admin_dapat_menyelesaikan_laporan_berstatus_proses(): void
+    {
+        $admin   = User::factory()->admin()->create();
+        $laporan = Laporan::factory()->proses()->create(['judul' => 'Kunci Motor Selesai']);
+
+        $response = $this->actingAs($admin)
+            ->post(route('admin.laporan.selesai', $laporan->id));
+
+        $response->assertSessionHas('success');
+        $this->assertEquals('selesai', $laporan->fresh()->status);
+    }
+
+    /**
+     * Pengguna biasa tidak dapat menandai laporan selesai melalui route admin.
+     */
+    public function test_pengguna_biasa_tidak_dapat_menyelesaikan_laporan_via_admin_route(): void
+    {
+        $user    = User::factory()->create();
+        $laporan = Laporan::factory()->proses()->create();
+
+        $response = $this->actingAs($user)
+            ->post(route('admin.laporan.selesai', $laporan->id));
+
+        $response->assertStatus(403);
+        $this->assertEquals('proses', $laporan->fresh()->status);
+    }
 }

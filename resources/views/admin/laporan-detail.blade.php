@@ -234,8 +234,19 @@
                             </form>
                         </div>
                     @elseif($laporan->status === 'proses')
-                        <p class="text-xs text-slate-500 mb-4">Postingan ini sedang aktif tampil di beranda publik. Anda dapat men-takedown dari beranda atau menghapus postingan ini secara permanen.</p>
+                        <p class="text-xs text-slate-500 mb-4">Postingan ini sedang aktif tampil di beranda publik. Anda dapat menandai laporan selesai, men-takedown dari beranda, atau menghapus postingan ini secara permanen.</p>
                         <div class="flex flex-col sm:flex-row gap-3">
+                            <form action="{{ route('admin.laporan.selesai', $laporan->id) }}" method="POST" class="flex-1"
+                                  onsubmit="return confirm('Tandai laporan &quot;{{ addslashes($laporan->judul) }}&quot; sebagai selesai?')">
+                                @csrf
+                                <button type="submit"
+                                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-xs transition-all flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Tandai Selesai
+                                </button>
+                            </form>
                             <form action="{{ route('admin.laporan.takedown', $laporan->id) }}" method="POST" class="flex-1"
                                   onsubmit="return confirm('Takedown postingan &quot;{{ addslashes($laporan->judul) }}&quot; dari beranda publik? Laporan tidak akan lagi tampil di publik.')">
                                 @csrf
@@ -244,7 +255,7 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                     </svg>
-                                    Takedown dari Beranda
+                                    Takedown
                                 </button>
                             </form>
                             <form action="{{ route('admin.laporan.destroy', $laporan->id) }}" method="POST" class="flex-1"
@@ -256,7 +267,7 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
-                                    Hapus Postingan Permanen
+                                    Hapus Permanen
                                 </button>
                             </form>
                         </div>
