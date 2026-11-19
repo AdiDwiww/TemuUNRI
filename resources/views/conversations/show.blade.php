@@ -217,10 +217,10 @@
                             @endif
                             <div class="px-4 py-2.5 shadow-sm
                                 {{ $mine
-                                    ? 'bg-[#1e293b] text-white rounded-2xl rounded-tr-none'
+                                    ? 'bg-blue-100 text-gray-900 rounded-2xl rounded-tr-none border border-blue-200'
                                     : 'bg-white text-gray-800 rounded-2xl rounded-tl-none border border-gray-100' }}">
-                                <p class="text-sm whitespace-pre-line break-words leading-relaxed">{{ $message->body }}</p>
-                                <p class="text-[10px] mt-1.5 {{ $mine ? 'text-slate-400 text-right' : 'text-gray-400' }}">
+                                <p class="text-sm whitespace-pre-line break-words leading-relaxed text-gray-900">{{ $message->body }}</p>
+                                <p class="text-[10px] mt-1.5 {{ $mine ? 'text-gray-500 text-right' : 'text-gray-400' }}">
                                     {{ $message->created_at->format('H:i') }}
                                     @if($mine)
                                         {{ $message->read_at ? '✓✓' : '✓' }}
@@ -361,15 +361,15 @@
 
             const bubble = document.createElement('div');
             bubble.className = 'px-4 py-2.5 shadow-sm ' + (m.mine
-                ? 'bg-[#1e293b] text-white rounded-2xl rounded-tr-none'
+                ? 'bg-blue-100 text-gray-900 rounded-2xl rounded-tr-none border border-blue-200'
                 : 'bg-white text-gray-800 rounded-2xl rounded-tl-none border border-gray-100');
 
             const bodyEl = document.createElement('p');
-            bodyEl.className = 'text-sm whitespace-pre-line break-words leading-relaxed';
+            bodyEl.className = 'text-sm whitespace-pre-line break-words leading-relaxed text-gray-900';
             bodyEl.textContent = m.body;
 
             const timeEl = document.createElement('p');
-            timeEl.className = 'text-[10px] mt-1.5 ' + (m.mine ? 'text-slate-400 text-right' : 'text-gray-400');
+            timeEl.className = 'text-[10px] mt-1.5 ' + (m.mine ? 'text-gray-500 text-right' : 'text-gray-400');
             timeEl.textContent = m.time + (m.mine ? ' ✓' : '');
 
             bubble.append(bodyEl, timeEl);
